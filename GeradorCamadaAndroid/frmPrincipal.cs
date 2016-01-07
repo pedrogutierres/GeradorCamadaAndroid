@@ -252,6 +252,7 @@ namespace GeradorCamadaAndroid
                 }
             }
             public string Default { get; set; }
+            public string Comment { get; set; }
             public bool ChavePrimaria { get; set; }
             public bool AceitaNulo { get; set; }
             public bool AutoIncremento { get; set; }
@@ -422,6 +423,7 @@ namespace GeradorCamadaAndroid
                             coluna.Descricao = rdr["column_name"].ToString();
                             coluna.Tipo = rdr["column_type"].ToString();
                             coluna.Default = rdr["column_default"].ToString();
+                            coluna.Comment = rdr["column_comment"].ToString();
                             coluna.ChavePrimaria = rdr["column_key"].ToString().ToLower().Contains("pri");
                             coluna.AceitaNulo = rdr["is_nullable"].ToString().ToLower().Contains("yes");
                             coluna.AutoIncremento = rdr["extra"].ToString().ToLower().Contains("auto_increment");
@@ -447,12 +449,20 @@ namespace GeradorCamadaAndroid
                     using (TextWriter arquivo = File.AppendText(diretorio + "\\basemodel\\Base" + tabela.ArquivoModel))
                     {
                         bool existeLazyLoading = (tabela.colunas.Find(p => p.Descricao != "id" && p.Descricao.EndsWith("_id")) != null);
+                        bool existeComment = (tabela.colunas.Find(p => !string.IsNullOrEmpty(p.Comment)) != null);
 
                         arquivo.WriteLine("package " + txtPacote.Text + ".model;");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("import android.content.ContentValues;");
                         arquivo.WriteLine("import android.content.Context;");
                         arquivo.WriteLine("import android.database.Cursor;");
+
+                        if (existeComment)
+                        {
+                            arquivo.WriteLine("");
+                            arquivo.WriteLine("import com.google.gson.annotations.SerializedName;");
+                        }
+
                         arquivo.WriteLine("");
                         arquivo.WriteLine("import java.io.Serializable;");
                         arquivo.WriteLine("import java.util.Date;");
@@ -467,6 +477,8 @@ namespace GeradorCamadaAndroid
                         // Cria variaveis privadas
                         foreach (ColunaInfo c in tabela.colunas)
                         {
+                            if (!string.IsNullOrEmpty(c.Comment))
+                                arquivo.WriteLine("    @SerializedName(\"" + c.Comment + "\")");
                             arquivo.WriteLine("    private " + c.TipoVariavel.ToString() + " " + c.Descricao + ";");
                         }
 
