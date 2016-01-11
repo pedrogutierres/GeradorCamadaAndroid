@@ -252,7 +252,7 @@ namespace GeradorCamadaAndroid
                 }
             }
             public string Default { get; set; }
-            public string Comment { get; set; }
+            public string Comentario { get; set; }
             public bool ChavePrimaria { get; set; }
             public bool AceitaNulo { get; set; }
             public bool AutoIncremento { get; set; }
@@ -423,7 +423,7 @@ namespace GeradorCamadaAndroid
                             coluna.Descricao = rdr["column_name"].ToString();
                             coluna.Tipo = rdr["column_type"].ToString();
                             coluna.Default = rdr["column_default"].ToString();
-                            coluna.Comment = rdr["column_comment"].ToString();
+                            coluna.Comentario = rdr["column_comment"].ToString();
                             coluna.ChavePrimaria = rdr["column_key"].ToString().ToLower().Contains("pri");
                             coluna.AceitaNulo = rdr["is_nullable"].ToString().ToLower().Contains("yes");
                             coluna.AutoIncremento = rdr["extra"].ToString().ToLower().Contains("auto_increment");
@@ -449,7 +449,7 @@ namespace GeradorCamadaAndroid
                     using (TextWriter arquivo = File.AppendText(diretorio + "\\basemodel\\Base" + tabela.ArquivoModel))
                     {
                         bool existeLazyLoading = (tabela.colunas.Find(p => p.Descricao != "id" && p.Descricao.EndsWith("_id")) != null);
-                        bool existeComment = (tabela.colunas.Find(p => !string.IsNullOrEmpty(p.Comment)) != null);
+                        bool existeComment = (tabela.colunas.Find(p => !string.IsNullOrEmpty(p.Comentario)) != null);
 
                         arquivo.WriteLine("package " + txtPacote.Text + ".model;");
                         arquivo.WriteLine("");
@@ -477,8 +477,9 @@ namespace GeradorCamadaAndroid
                         // Cria variaveis privadas
                         foreach (ColunaInfo c in tabela.colunas)
                         {
-                            if (!string.IsNullOrEmpty(c.Comment))
-                                arquivo.WriteLine("    @SerializedName(\"" + c.Comment + "\")");
+                            if (!string.IsNullOrEmpty(c.Comentario) && c.Comentario != "notjson")
+                                arquivo.WriteLine("    @SerializedName(\"" + c.Comentario + "\")");
+
                             arquivo.WriteLine("    private " + c.TipoVariavel.ToString() + " " + c.Descricao + ";");
                         }
 
@@ -865,11 +866,12 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("    public Base" + tabela.Classe + "DAO() {");
                         arquivo.WriteLine("    }");
                         arquivo.WriteLine("");
-                        arquivo.WriteLine("    public void insert(" + tabela.Classe + " " + tabela.Apelido + ") {");
+                        arquivo.WriteLine("    public boolean insert(" + tabela.Classe + " " + tabela.Apelido + ") {");
                         arquivo.WriteLine("        Uri newUri = contentResolver().insert(DataProvider." + tabela.CONTENT_URI + ", " + tabela.Apelido + ".values()); ");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("        long id = ContentUris.parseId(newUri);");
                         arquivo.WriteLine("        " + tabela.Apelido + ".setId(id);");
+                        arquivo.WriteLine("        return id > 0;");
                         arquivo.WriteLine("    }");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("    public int update(" + tabela.Classe + " " + tabela.Apelido + ") {");
