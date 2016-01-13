@@ -176,6 +176,7 @@ namespace GeradorCamadaAndroid
                     if (!string.IsNullOrEmpty(descricao))
                     {
                         DescricaoDB = descricao.ToLower();
+                        ObjetoBase = DescricaoDB == "datahora_criacao" || DescricaoDB == "datahora_alteracao";
 
                         if (descricao.Equals("_id"))
                         {
@@ -265,6 +266,8 @@ namespace GeradorCamadaAndroid
 
             public string ClasseRelacional { get; private set; }
             public string ClasseRelacionalApelido { get; private set; }
+
+            public bool ObjetoBase { get; set; }
 
             public TipoVariavelEnum TipoVariavel
             {
@@ -469,7 +472,7 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("");
                         arquivo.WriteLine("import " + txtPacote.Text + ".dal.DAOFactory;");
                         arquivo.WriteLine("");
-                        arquivo.WriteLine("public abstract class Base" + tabela.Classe + " implements Serializable {");
+                        arquivo.WriteLine("public abstract class Base" + tabela.Classe + " extends BaseObject {");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("    public static final String TABLE_NAME = \"" + tabela.Descricao + "\";");
                         arquivo.WriteLine("");
@@ -477,10 +480,13 @@ namespace GeradorCamadaAndroid
                         // Cria variaveis privadas
                         foreach (ColunaInfo c in tabela.colunas)
                         {
-                            if (!string.IsNullOrEmpty(c.Comentario) && c.Comentario != "notjson")
-                                arquivo.WriteLine("    @SerializedName(\"" + c.Comentario + "\")");
+                            if (!c.ObjetoBase)
+                            {
+                                if (!string.IsNullOrEmpty(c.Comentario) && c.Comentario != "notjson")
+                                    arquivo.WriteLine("    @SerializedName(\"" + c.Comentario + "\")");
 
-                            arquivo.WriteLine("    private " + c.TipoVariavel.ToString() + " " + c.Descricao + ";");
+                                arquivo.WriteLine("    private " + c.TipoVariavel.ToString() + " " + c.Descricao + ";");
+                            }
                         }
 
                         // Cria variaveis de classes relacionais
@@ -490,7 +496,12 @@ namespace GeradorCamadaAndroid
                             foreach (ColunaInfo c in tabela.colunas)
                             {
                                 if (!string.IsNullOrEmpty(c.ClasseRelacional))
+                                {
+                                    if (existeComment)
+                                        arquivo.WriteLine("    @SerializedName(\"" + c.ClasseRelacionalApelido + "Info\")");
+
                                     arquivo.WriteLine("    private " + c.ClasseRelacional + " " + c.ClasseRelacionalApelido + ";");
+                                }
                             }
                         }
 
@@ -511,6 +522,7 @@ namespace GeradorCamadaAndroid
                             {
                                 if (!string.IsNullOrEmpty(c.ClasseRelacional))
                                     arquivo.WriteLine("        this." + c.ClasseRelacionalApelido + " = t." + c.ClasseRelacionalApelido + ";");
+
                             }
                         }
 
@@ -523,14 +535,17 @@ namespace GeradorCamadaAndroid
                         // Cria get e set
                         foreach (ColunaInfo c in tabela.colunas)
                         {
-                            arquivo.WriteLine("    public " + c.TipoVariavel.ToString() + " " + c.DescricaoGet + "() {");
-                            arquivo.WriteLine("        return " + c.Descricao + ";");
-                            arquivo.WriteLine("    }");
-                            arquivo.WriteLine("");
-                            arquivo.WriteLine("    public void " + c.DescricaosSet + "(" + c.TipoVariavel.ToString() + " " + c.Descricao + ") {");
-                            arquivo.WriteLine("        this." + c.Descricao + " = " + c.Descricao + ";");
-                            arquivo.WriteLine("    }");
-                            arquivo.WriteLine("");
+                            if (!c.ObjetoBase)
+                            {
+                                arquivo.WriteLine("    public " + c.TipoVariavel.ToString() + " " + c.DescricaoGet + "() {");
+                                arquivo.WriteLine("        return " + c.Descricao + ";");
+                                arquivo.WriteLine("    }");
+                                arquivo.WriteLine("");
+                                arquivo.WriteLine("    public void " + c.DescricaosSet + "(" + c.TipoVariavel.ToString() + " " + c.Descricao + ") {");
+                                arquivo.WriteLine("        this." + c.Descricao + " = " + c.Descricao + ";");
+                                arquivo.WriteLine("    }");
+                                arquivo.WriteLine("");
+                            }
                         }
 
                         // Cria get do lazy loading
@@ -866,7 +881,13 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("    public Base" + tabela.Classe + "DAO() {");
                         arquivo.WriteLine("    }");
                         arquivo.WriteLine("");
-                        arquivo.WriteLine("    public boolean insert(" + tabela.Classe + " " + tabela.Apelido + ") {");
+                        arquivo.WriteLine("    public boolean salvar(" + tabela.Classe + " " + tabela.Apelido + ") {");
+                        arquivo.WriteLine("        return " + tabela.Apelido + ".getId() != null && " + tabela.Apelido + ".getId() > 0");
+                        arquivo.WriteLine("                ? update(" + tabela.Apelido + ")");
+                        arquivo.WriteLine("                : insert(" + tabela.Apelido + ");");
+                        arquivo.WriteLine("    }");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("    private boolean insert(" + tabela.Classe + " " + tabela.Apelido + ") {");
                         arquivo.WriteLine("        Uri newUri = contentResolver().insert(DataProvider." + tabela.CONTENT_URI + ", " + tabela.Apelido + ".values()); ");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("        long id = ContentUris.parseId(newUri);");
@@ -874,9 +895,9 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("        return id > 0;");
                         arquivo.WriteLine("    }");
                         arquivo.WriteLine("");
-                        arquivo.WriteLine("    public int update(" + tabela.Classe + " " + tabela.Apelido + ") {");
+                        arquivo.WriteLine("    private boolean update(" + tabela.Classe + " " + tabela.Apelido + ") {");
                         arquivo.WriteLine("        Uri uri = ContentUris.withAppendedId(DataProvider." + tabela.CONTENT_URI + ", " + tabela.Apelido + ".getId());");
-                        arquivo.WriteLine("        return contentResolver().update(uri, " + tabela.Apelido + ".values(), null, null);");
+                        arquivo.WriteLine("        return contentResolver().update(uri, " + tabela.Apelido + ".values(), null, null) > 0;");
                         arquivo.WriteLine("    }");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("    public int delete(" + tabela.Classe + " " + tabela.Apelido + ") {");
@@ -889,10 +910,11 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("");
                         arquivo.WriteLine("        Cursor c = get" + tabela.Classe + "ByIdLoader(id).loadInBackground();");
                         arquivo.WriteLine("        try {");
-                        arquivo.WriteLine("            if (c.moveToFirst())");
+                        arquivo.WriteLine("            if (c != null && c.moveToFirst())");
                         arquivo.WriteLine("                " + tabela.Apelido + ".loadFromCursor(c, lazyLoading.length > 0 && lazyLoading[0], context());");
                         arquivo.WriteLine("        } finally {");
-                        arquivo.WriteLine("            c.close();");
+                        arquivo.WriteLine("            if (c != null)");
+                        arquivo.WriteLine("                c.close();");
                         arquivo.WriteLine("        }");
                         arquivo.WriteLine("        return " + tabela.Apelido + ";");
                         arquivo.WriteLine("    }");
@@ -931,10 +953,11 @@ namespace GeradorCamadaAndroid
                                     arquivo.WriteLine("");
                                     arquivo.WriteLine("        Cursor c = get" + tabela.Classe + pesquisaPor + "Cursor(" + c.Descricao + ");");
                                     arquivo.WriteLine("        try {");
-                                    arquivo.WriteLine("            if (c.moveToFirst())");
+                                    arquivo.WriteLine("            if (c != null && c.moveToFirst())");
                                     arquivo.WriteLine("                " + tabela.Apelido + ".loadFromCursor(c" + variavelLazyLoading + ");");
                                     arquivo.WriteLine("        } finally {");
-                                    arquivo.WriteLine("            c.close();");
+                                    arquivo.WriteLine("            if (c != null)");
+                                    arquivo.WriteLine("                c.close();");
                                     arquivo.WriteLine("        }");
                                     arquivo.WriteLine("        return " + tabela.Apelido + ";");
                                     arquivo.WriteLine("    }");
@@ -948,7 +971,7 @@ namespace GeradorCamadaAndroid
                                     arquivo.WriteLine("");
                                     arquivo.WriteLine("        Cursor c = get" + tabela.ClassePlural + pesquisaPor + "Cursor(" + c.Descricao + ");");
                                     arquivo.WriteLine("        try {");
-                                    arquivo.WriteLine("            if (c.moveToFirst()) {");
+                                    arquivo.WriteLine("            if (c != null && c.moveToFirst()) {");
                                     arquivo.WriteLine("                do {");
                                     arquivo.WriteLine("                    " + tabela.Classe + " t = new " + tabela.Classe + "();");
                                     arquivo.WriteLine("                    t.loadFromCursor(c" + variavelLazyLoading + ");");
@@ -956,7 +979,8 @@ namespace GeradorCamadaAndroid
                                     arquivo.WriteLine("                } while (c.moveToNext());");
                                     arquivo.WriteLine("            }");
                                     arquivo.WriteLine("        } finally {");
-                                    arquivo.WriteLine("            c.close();");
+                                    arquivo.WriteLine("            if (c != null)");
+                                    arquivo.WriteLine("                c.close();");
                                     arquivo.WriteLine("        }");
                                     arquivo.WriteLine("        return " + tabela.ApelidoPlural + ";");
                                     arquivo.WriteLine("    }");
@@ -1009,7 +1033,7 @@ namespace GeradorCamadaAndroid
                             arquivo.WriteLine("");
                             arquivo.WriteLine("        Cursor c = get" + tabela.ClassePlural + "PorParametros(" + parametrosPassar.ToString().Remove(parametrosPassar.Length - 2, 2) + ");");
                             arquivo.WriteLine("        try {");
-                            arquivo.WriteLine("            if (c.moveToFirst()) {");
+                            arquivo.WriteLine("            if (c != null && c.moveToFirst()) {");
                             arquivo.WriteLine("                do {");
                             arquivo.WriteLine("                    " + tabela.Classe + " t = new " + tabela.Classe + "();");
                             arquivo.WriteLine("                    t.loadFromCursor(c" + variavelLazyLoading + ");");
@@ -1017,7 +1041,8 @@ namespace GeradorCamadaAndroid
                             arquivo.WriteLine("                } while (c.moveToNext());");
                             arquivo.WriteLine("            }");
                             arquivo.WriteLine("        } finally {");
-                            arquivo.WriteLine("            c.close();");
+                            arquivo.WriteLine("            if (c != null)");
+                            arquivo.WriteLine("                c.close();");
                             arquivo.WriteLine("        }");
                             arquivo.WriteLine("        return " + tabela.ApelidoPlural + ";");
                             arquivo.WriteLine("    }");
@@ -1046,7 +1071,7 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("");
                         arquivo.WriteLine("        Cursor c = get" + tabela.ClassePlural + "();");
                         arquivo.WriteLine("        try {");
-                        arquivo.WriteLine("            if (c.moveToFirst()) {");
+                        arquivo.WriteLine("            if (c != null && c.moveToFirst()) {");
                         arquivo.WriteLine("                do {");
                         arquivo.WriteLine("                    " + tabela.Classe + " t = new " + tabela.Classe + "();");
                         arquivo.WriteLine("                    t.loadFromCursor(c" + variavelLazyLoading + ");");
@@ -1054,7 +1079,8 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("                } while (c.moveToNext());");
                         arquivo.WriteLine("            }");
                         arquivo.WriteLine("        } finally {");
-                        arquivo.WriteLine("            c.close();");
+                        arquivo.WriteLine("            if (c != null)");
+                        arquivo.WriteLine("                c.close();");
                         arquivo.WriteLine("        }");
                         arquivo.WriteLine("        return " + tabela.ApelidoPlural + ";");
                         arquivo.WriteLine("    }");
@@ -1122,6 +1148,46 @@ namespace GeradorCamadaAndroid
 
                 if (tabelas.Count > 0)
                 {
+                    #region CriaArquivo BaseObject
+                    File.Create(diretorio + "\\basemodel\\BaseObject.java").Close();
+                    using (TextWriter arquivo = File.AppendText(diretorio + "\\basemodel\\BaseObject.java"))
+                    {
+                        arquivo.WriteLine("package " + txtPacote.Text + ".basemodel;");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("import com.google.gson.annotations.SerializedName;");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("import java.io.Serializable;");
+                        arquivo.WriteLine("import java.util.Date;");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("public abstract class BaseObject implements Serializable {");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("    @SerializedName(\"datahora_criacao\")");
+                        arquivo.WriteLine("    protected Date datahora_criacao;");
+                        arquivo.WriteLine("    @SerializedName(\"datahora_alteracao\")");
+                        arquivo.WriteLine("    protected Date datahora_alteracao;");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("    public Date getDatahora_alteracao() {");
+                        arquivo.WriteLine("        return datahora_alteracao;");
+                        arquivo.WriteLine("    }");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("    public void setDatahora_alteracao(Date datahora_alteracao) {");
+                        arquivo.WriteLine("        this.datahora_alteracao = datahora_alteracao;");
+                        arquivo.WriteLine("    }");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("    public Date getDatahora_criacao() {");
+                        arquivo.WriteLine("        return datahora_criacao;");
+                        arquivo.WriteLine("    }");
+                        arquivo.WriteLine("");
+                        arquivo.WriteLine("    public void setDatahora_criacao(Date datahora_criacao) {");
+                        arquivo.WriteLine("        this.datahora_criacao = datahora_criacao;");
+                        arquivo.WriteLine("    }");
+                        arquivo.WriteLine("}");
+
+                        arquivo.Flush();
+                        arquivo.Close();
+                    }
+                    #endregion
+
                     #region CriaArquivo DAO
                     File.Create(diretorio + "\\dal\\DAOFactory.java").Close();
                     using (TextWriter arquivo = File.AppendText(diretorio + "\\dal\\DAOFactory.java"))
