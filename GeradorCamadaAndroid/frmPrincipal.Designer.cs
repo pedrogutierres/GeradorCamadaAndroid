@@ -51,6 +51,7 @@
             this.label4 = new System.Windows.Forms.Label();
             this.cmbDatabase = new System.Windows.Forms.ComboBox();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.chkVersaoSuporte = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tabAtualiza.SuspendLayout();
@@ -201,6 +202,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.chkVersaoSuporte);
             this.groupBox3.Controls.Add(this.label1);
             this.groupBox3.Controls.Add(this.txtPacote);
             this.groupBox3.Controls.Add(this.btnCancelar);
@@ -297,6 +299,16 @@
             this.cmbDatabase.Size = new System.Drawing.Size(222, 21);
             this.cmbDatabase.TabIndex = 6;
             // 
+            // chkVersaoSuporte
+            // 
+            this.chkVersaoSuporte.AutoSize = true;
+            this.chkVersaoSuporte.Location = new System.Drawing.Point(79, 105);
+            this.chkVersaoSuporte.Name = "chkVersaoSuporte";
+            this.chkVersaoSuporte.Size = new System.Drawing.Size(120, 17);
+            this.chkVersaoSuporte.TabIndex = 13;
+            this.chkVersaoSuporte.Text = "Versão com suporte";
+            this.chkVersaoSuporte.UseVisualStyleBackColor = true;
+            // 
             // frmPrincipal
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -346,6 +358,7 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtPacote;
+        private System.Windows.Forms.CheckBox chkVersaoSuporte;
     }
 }
 

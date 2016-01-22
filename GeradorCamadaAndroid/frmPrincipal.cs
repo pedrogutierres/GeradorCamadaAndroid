@@ -864,7 +864,7 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("package " + txtPacote.Text + ".basedal;");
                         arquivo.WriteLine("");
                         arquivo.WriteLine("import android.content.ContentUris;");
-                        arquivo.WriteLine("import android.content.CursorLoader;");
+                        arquivo.WriteLine(chkVersaoSuporte.Checked ? "import android.support.v4.content.CursorLoader;" : "import android.content.CursorLoader;");
                         arquivo.WriteLine("import android.database.Cursor;");
                         arquivo.WriteLine("import android.net.Uri;");
                         arquivo.WriteLine("import android.os.Bundle;");
@@ -1451,7 +1451,7 @@ namespace GeradorCamadaAndroid
             coluna = coluna.ToUpper();
             bool ok = true;
 
-            if (coluna.Contains("CODIGO") || coluna.Contains("NUMERO") || coluna.Equals("EAN"))
+            if (coluna.Contains("CODIGO") || coluna.Contains("NUMERO") || coluna.Equals("EAN") || coluna.Equals("CPF") || coluna.Equals("CNPJ"))
             { }
             else if (coluna.Contains("DESCRICAO") || coluna.Contains("NOME") || coluna.Contains("RAZAO") || coluna.Contains("FANTASIA"))
             {
