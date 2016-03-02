@@ -87,6 +87,11 @@ namespace GeradorCamadaAndroid
                         ApelidoPlural = Classe.Substring(0, 1).ToLower() + (Classe.Length > 1 ? Classe.Substring(1) : "");
                         Classe = Classe.Remove(Classe.Length - 3, 3) + "ao";
                     }
+                    else if (Classe.ToLower().EndsWith("ais"))
+                    {
+                        ApelidoPlural = Classe.Substring(0, 1).ToLower() + (Classe.Length > 1 ? Classe.Substring(1) : "");
+                        Classe = Classe.Remove(Classe.Length - 3, 3) + "al";
+                    }
                     else if (Classe.ToLower().EndsWith("paes"))
                     {
                         ApelidoPlural = Classe.Substring(0, 1).ToLower() + (Classe.Length > 1 ? Classe.Substring(1) : "");
@@ -107,6 +112,11 @@ namespace GeradorCamadaAndroid
                         ApelidoPlural = Classe.Substring(0, 1).ToLower() + (Classe.Length > 1 ? Classe.Substring(1) : "");
                         Classe = Classe.Remove(Classe.Length - 1, 1);
                     }
+                    else if (Classe.ToLower().EndsWith("ns"))
+                    {
+                        ApelidoPlural = Classe.Substring(0, 1).ToLower() + (Classe.Length > 1 ? Classe.Substring(1) : "");
+                        Classe = Classe.Remove(Classe.Length - 2, 2) + "m";
+                    }
                     else if (Classe.ToLower().EndsWith("s"))
                     {
                         ApelidoPlural = Classe.Substring(0, 1).ToLower() + (Classe.Length > 1 ? Classe.Substring(1) : "");
@@ -121,8 +131,12 @@ namespace GeradorCamadaAndroid
                             ApelidoPlural = Apelido.Remove(Apelido.Length - 2, 2) + "aes";
                         else if (Apelido.EndsWith("ao"))
                             ApelidoPlural = Apelido.Remove(Apelido.Length - 2, 2) + "oes";
+                        else if (Apelido.EndsWith("al"))
+                            ApelidoPlural = Apelido.Remove(Apelido.Length - 2, 2) + "ais";
                         else if (Apelido.EndsWith("r"))
                             ApelidoPlural = Apelido + "es";
+                        else if (Apelido.EndsWith("m"))
+                            ApelidoPlural = Apelido + "ns";
                         else
                             ApelidoPlural = Apelido + "s";
                     }
@@ -1393,7 +1407,6 @@ namespace GeradorCamadaAndroid
                     }
                     #endregion
                 }
-
 
                 using (TextWriter arquivoIndice = File.AppendText(diretorio + "\\indice.txt"))
                 {
