@@ -919,6 +919,12 @@ namespace GeradorCamadaAndroid
                         arquivo.WriteLine("        return contentResolver().delete(uri, null, null);");
                         arquivo.WriteLine("    }");
                         arquivo.WriteLine("");
+                        arquivo.WriteLine("    public void deleteAll() {");
+                        arquivo.WriteLine("        rawQuery(DataProvider." + tabela.CONTENT_URI_RAW + ", \"DELETE FROM \" + " + tabela.Classe + ".TABLE_NAME, null);");
+                        arquivo.WriteLine("        rawQuery(DataProvider." + tabela.CONTENT_URI_RAW + ", \"UPDATE SQLITE_SEQUENCE SET seq = 0 WHERE name = '\" + " + tabela.Classe + ".TABLE_NAME + \"'\", null);");
+                        arquivo.WriteLine("        rawQuery(DataProvider." + tabela.CONTENT_URI_RAW + ", \"VACUUM\", null);");
+                        arquivo.WriteLine("    }");
+                        arquivo.WriteLine("");
                         arquivo.WriteLine("    public " + tabela.Classe + " get" + tabela.Classe + "ById(long id, boolean... lazyLoading) {");
                         arquivo.WriteLine("        " + tabela.Classe + " " + tabela.Apelido + " = new " + tabela.Classe + "();");
                         arquivo.WriteLine("");
