@@ -80,7 +80,7 @@ namespace GeradorCamadaAndroid.Library
             texto.AppendLine("    }                                                                                      ");
             texto.AppendLine("                                                                                           ");
             texto.AppendLine("    @Override                                                                              ");
-            texto.AppendLine("    // Chamado pelo Android quando o banco de dados � aberto                               ");
+            texto.AppendLine("    // Chamado pelo Android quando o banco de dados é aberto                               ");
             texto.AppendLine("    public void onOpen(SQLiteDatabase db) {                                                ");
             texto.AppendLine("        super.onOpen(db);                                                                  ");
             texto.AppendLine("                                                                                           ");
