@@ -384,6 +384,9 @@ namespace GeradorCamadaAndroid
                 if (!Directory.Exists(diretorio + "\\dal"))
                     Directory.CreateDirectory(diretorio + "\\dal");
 
+                if (!Directory.Exists(diretorio + "\\data"))
+                    Directory.CreateDirectory(diretorio + "\\data");
+
                 string comando = @"
                     SELECT *, 0 as ordenar
                        FROM INFORMATION_SCHEMA.`TABLES`
@@ -1172,36 +1175,29 @@ namespace GeradorCamadaAndroid
                     File.Create(diretorio + "\\basemodel\\BaseObject.java").Close();
                     using (TextWriter arquivo = File.AppendText(diretorio + "\\basemodel\\BaseObject.java"))
                     {
-                        arquivo.WriteLine("package " + txtPacote.Text + ".basemodel;");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("import com.google.gson.annotations.SerializedName;");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("import java.io.Serializable;");
-                        arquivo.WriteLine("import java.util.Date;");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("public abstract class BaseObject implements Serializable {");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("    @SerializedName(\"datahora_criacao\")");
-                        arquivo.WriteLine("    protected Date datahora_criacao;");
-                        arquivo.WriteLine("    @SerializedName(\"datahora_alteracao\")");
-                        arquivo.WriteLine("    protected Date datahora_alteracao;");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("    public Date getDatahora_alteracao() {");
-                        arquivo.WriteLine("        return datahora_alteracao;");
-                        arquivo.WriteLine("    }");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("    public void setDatahora_alteracao(Date datahora_alteracao) {");
-                        arquivo.WriteLine("        this.datahora_alteracao = datahora_alteracao;");
-                        arquivo.WriteLine("    }");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("    public Date getDatahora_criacao() {");
-                        arquivo.WriteLine("        return datahora_criacao;");
-                        arquivo.WriteLine("    }");
-                        arquivo.WriteLine("");
-                        arquivo.WriteLine("    public void setDatahora_criacao(Date datahora_criacao) {");
-                        arquivo.WriteLine("        this.datahora_criacao = datahora_criacao;");
-                        arquivo.WriteLine("    }");
-                        arquivo.WriteLine("}");
+                        arquivo.Write(Library.ArquivoBaseObjects.RetornaTextoArquivo(txtPacote.Text));
+
+                        arquivo.Flush();
+                        arquivo.Close();
+                    }
+                    #endregion
+
+                    #region CriaArquivo DBHelper
+                    File.Create(diretorio + "\\data\\DBHelper.java").Close();
+                    using (TextWriter arquivo = File.AppendText(diretorio + "\\data\\DBHelper.java"))
+                    {
+                        arquivo.Write(Library.ArquivoDBHelper.RetornaTextoArquivo(txtPacote.Text));
+
+                        arquivo.Flush();
+                        arquivo.Close();
+                    }
+                    #endregion
+
+                    #region CriaArquivo DAO Main
+                    File.Create(diretorio + "\\dal\\DAO.java").Close();
+                    using (TextWriter arquivo = File.AppendText(diretorio + "\\dal\\DAO.java"))
+                    {
+                        arquivo.Write(Library.ArquivoDAO.RetornaTextoArquivo(txtPacote.Text));
 
                         arquivo.Flush();
                         arquivo.Close();
@@ -1239,6 +1235,28 @@ namespace GeradorCamadaAndroid
                         }
 
                         arquivo.WriteLine("}");
+
+                        arquivo.Flush();
+                        arquivo.Close();
+                    }
+                    #endregion
+
+                    #region CriaArquivo DataHandler
+                    File.Create(diretorio + "\\provider\\DataHandler.java").Close();
+                    using (TextWriter arquivo = File.AppendText(diretorio + "\\provider\\DataHandler.java"))
+                    {
+                        arquivo.Write(Library.ArquivoDataHandler.RetornaTextoArquivo(txtPacote.Text));
+
+                        arquivo.Flush();
+                        arquivo.Close();
+                    }
+                    #endregion
+
+                    #region CriaArquivo InvalidURIException
+                    File.Create(diretorio + "\\provider\\InvalidURIException.java").Close();
+                    using (TextWriter arquivo = File.AppendText(diretorio + "\\provider\\InvalidURIException.java"))
+                    {
+                        arquivo.Write(Library.ArquivoInvalidException.RetornaTextoArquivo(txtPacote.Text));
 
                         arquivo.Flush();
                         arquivo.Close();

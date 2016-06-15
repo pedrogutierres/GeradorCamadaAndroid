@@ -57,6 +57,11 @@
       <DependentUpon>frmPrincipal.cs</DependentUpon>
     </Compile>
     <Compile Include="Funcoes.cs" />
+    <Compile Include="Library\ArquivoBaseObjects.cs" />
+    <Compile Include="Library\ArquivoDBHelper.cs" />
+    <Compile Include="Library\ArquivoInvalidException.cs" />
+    <Compile Include="Library\ArquivoDataHandler.cs" />
+    <Compile Include="Library\ArquivoDAO.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="frmPrincipal.resx">
